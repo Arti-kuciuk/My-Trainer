@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Trainer</title>
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="history">
+        <button id="history-btn">
+            <span class="button-text">History</span>
+            <div class="history-records">
+                <!-- Сюда будут добавляться записи -->
+            </div>
+        </button>
+    </div>
+    
+    <div class="burger">
+        <div class="burger-icon" id="burger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="burger-menu" id="burger-menu">
+            <div class="burger-content">
+                <div class="hr1"><span></span></div>
+                <span class="burger-text">History</span>
+                <div class="burger-records">
+                    <!-- Сюда тоже можно добавлять записи, аналогично кнопке "History" -->
+                </div>
+                <div class="hr2"><span></span></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text">
+        <h1>Training Tracker</h1>
+    </div>
+
+    <div class="counter" id="counter">0</div>
+
+    <div class="button-container">
+        <div class="button" id="-10">
+            <button>-10</button>
+        </div>
+        <div class="button" id="-">
+            <button>-</button>
+        </div>
+        <div class="button" id="reset">
+            <button>reset</button>
+        </div>
+        <div class="button" id="undo">
+            <button>undo</button>
+        </div>
+        <div class="button" id="+">
+            <button>+</button>
+        </div>
+        <div class="button" id="+10">
+            <button>+10</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
