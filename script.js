@@ -148,18 +148,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedHistory = localStorage.getItem('history');
 
     if (savedHistory) {
-        // Восстанавливаем массив из localStorage
-        hist_arr = JSON.parse(savedHistory);
-        console.log("Parsed hist_arr:", hist_arr);
+        try {
+            hist_arr = JSON.parse(savedHistory);
+            if (!Array.isArray(hist_arr)) {
+                hist_arr = []; // Если почему-то загрузилось не массивом, сбрасываем
+            }
+        } catch (error) {
+            console.error("Ошибка парсинга истории:", error);
+            hist_arr = []; // Если JSON был некорректен, сбрасываем
+        }
+    } else {
+        hist_arr = []; // Если данных нет, создаем пустой массив
     }
 
-    // Обновляем отображение истории
-    updateHistoryRecords();
-
-    const savedCounter = localStorage.getItem('counter');
-    if (savedCounter) {
-        counter.textContent = savedCounter; // Устанавливаем сохранённое значение
-    }
+    console.log("Parsed hist_arr:", hist_arr);
+    updateHistoryRecords(); // Обновляем отображение истории
 });
 
 const burgerIcon = document.getElementById("burger-icon");
