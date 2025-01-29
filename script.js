@@ -146,23 +146,27 @@ function updateHistoryRecords() {
 // Загрузка данных из localStorage при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
     const savedHistory = localStorage.getItem('history');
-
     if (savedHistory) {
         try {
             hist_arr = JSON.parse(savedHistory);
             if (!Array.isArray(hist_arr)) {
-                hist_arr = []; // Если почему-то загрузилось не массивом, сбрасываем
+                hist_arr = []; // Если вдруг данные повреждены, создаём пустой массив
             }
         } catch (error) {
-            console.error("Ошибка парсинга истории:", error);
-            hist_arr = []; // Если JSON был некорректен, сбрасываем
+            console.error("Ошибка при парсинге истории:", error);
+            hist_arr = [];
         }
     } else {
-        hist_arr = []; // Если данных нет, создаем пустой массив
+        hist_arr = [];
     }
 
-    console.log("Parsed hist_arr:", hist_arr);
-    updateHistoryRecords(); // Обновляем отображение истории
+    // Обновляем отображение истории
+    updateHistoryRecords();
+
+    const savedCounter = localStorage.getItem('counter');
+    if (savedCounter !== null) { // Проверяем, действительно ли сохранено число
+        counter.textContent = savedCounter;
+    }
 });
 
 const burgerIcon = document.getElementById("burger-icon");
