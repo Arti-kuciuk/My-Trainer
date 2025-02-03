@@ -82,31 +82,29 @@ function addToArray() {
     let currentDate = new Date();
     let currentValue = counter.textContent;
 
-    // Проверяем, если в массиве уже есть записи
-    if (hist_arr.length > 0) {
-        // Сравниваем текущее значение с последним записанным значением
-        let lastRecord = hist_arr[hist_arr.length - 1];
-        if (lastRecord.value === currentValue) {
-            console.log("Значение счетчика не изменилось, запись не добавляется.");
-            return; 
-        }
-    }
-
-    // Если в массиве уже 5 записей, удаляем первую (самую старую)
+    // Если в массиве уже 5 записей, удаляем самую старую
     if (hist_arr.length >= 5) {
         hist_arr.shift();
     }
 
-    // Добавляем новую запись
-    hist_arr.push({ value: currentValue, date: currentDate });
+    if (hist_arr.length > 0) {
+        let lastRecord = hist_arr[hist_arr.length - 1];
 
-    // Сохраняем массив в localStorage
-    localStorage.setItem('history', JSON.stringify(hist_arr));
-
-    console.log("Saved to localStorage:", localStorage.getItem('history'));
-
-    // Обновляем отображение истории
-    updateHistoryRecords();
+        // Проверяем, изменилось ли значение счетчика
+        if (lastRecord.value != currentValue) {
+            hist_arr.push({ value: currentValue, date: currentDate });
+            localStorage.setItem('history', JSON.stringify(hist_arr));
+            console.log("Saved to localStorage:", localStorage.getItem('history'));
+            updateHistoryRecords();
+        } else {
+            console.log("Значение счетчика не изменилось, запись не добавляется.");
+        }
+    } else {
+        // Если это первая запись, просто добавляем её
+        hist_arr.push({ value: currentValue, date: currentDate });
+        localStorage.setItem('history', JSON.stringify(hist_arr));
+        updateHistoryRecords();
+    }
 }
 
 // Функция для проверки времени
