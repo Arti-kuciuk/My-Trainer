@@ -82,35 +82,37 @@ function addToArray() {
     let currentDate = new Date();
     let currentValue = counter.textContent;
 
-    // Если в массиве уже 5 записей, удаляем самую старую
+    // Проверяем, если в массиве уже есть записи
+    if (hist_arr.length > 0) {
+        // Сравниваем текущее значение с последним записанным значением
+        let lastRecord = hist_arr[hist_arr.length - 1];
+        if (lastRecord.value === currentValue) {
+            console.log("Значение счетчика не изменилось, запись не добавляется.");
+            return; 
+        }
+    }
+
+    // Если в массиве уже 5 записей, удаляем первую (самую старую)
     if (hist_arr.length >= 5) {
         hist_arr.shift();
     }
 
-    if (hist_arr.length > 0) {
-        let lastRecord = hist_arr[hist_arr.length - 1];
+    // Добавляем новую запись
+    hist_arr.push({ value: currentValue, date: currentDate });
 
-        // Проверяем, изменилось ли значение счетчика
-        if (lastRecord.value != currentValue) {
-            hist_arr.push({ value: currentValue, date: currentDate });
-            localStorage.setItem('history', JSON.stringify(hist_arr));
-            console.log("Saved to localStorage:", localStorage.getItem('history'));
-            updateHistoryRecords();
-        } else {
-            console.log("Значение счетчика не изменилось, запись не добавляется.");
-        }
-    } else {
-        // Если это первая запись, просто добавляем её
-        hist_arr.push({ value: currentValue, date: currentDate });
-        localStorage.setItem('history', JSON.stringify(hist_arr));
-        updateHistoryRecords();
-    }
+    // Сохраняем массив в localStorage
+    localStorage.setItem('history', JSON.stringify(hist_arr));
+
+    console.log("Saved to localStorage:", localStorage.getItem('history'));
+
+    // Обновляем отображение истории
+    updateHistoryRecords();
 }
 
 // Функция для проверки времени
 function checkTime() {
     let now = new Date();
-    if (now.getHours() === 0 && now.getMinutes() === 0) {
+    if (now.getHours() === 0 && now.getMinutes() === 37) {
         addToArray();
     }
 }
@@ -144,22 +146,23 @@ function updateHistoryRecords() {
 // Загрузка данных из localStorage при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
     const savedHistory = localStorage.getItem('history');
+
     if (savedHistory) {
         try {
             hist_arr = JSON.parse(savedHistory);
             if (!Array.isArray(hist_arr)) {
-                hist_arr = []; // Если вдруг данные повреждены, создаём пустой массив
+                hist_arr = []; // Если почему-то загрузилось не массивом, сбрасываем
             }
         } catch (error) {
-            console.error("Ошибка при парсинге истории:", error);
-            hist_arr = [];
+            console.error("Ошибка парсинга истории:", error);
+            hist_arr = []; // Если JSON был некорректен, сбрасываем
         }
     } else {
-        hist_arr = [];
+        hist_arr = []; // Если данных нет, создаем пустой массив
     }
 
-    // Обновляем отображение истории
-    updateHistoryRecords();
+    console.log("Parsed hist_arr:", hist_arr);
+    updateHistoryRecords(); // Обновляем отображение истории
 
     const savedCounter = localStorage.getItem('counter');
     if (savedCounter !== null) { // Проверяем, действительно ли сохранено число
