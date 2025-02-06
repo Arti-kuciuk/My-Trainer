@@ -112,7 +112,7 @@ function addToArray() {
 // Функция для проверки времени
 function checkTime() {
     let now = new Date();
-    if (now.getHours() === 0 && now.getMinutes() === 26) {
+    if (now.getHours() === 0 && now.getMinutes() === 30) {
         addToArray();
     }
 }
