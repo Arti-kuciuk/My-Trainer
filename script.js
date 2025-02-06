@@ -75,97 +75,88 @@ history.addEventListener('click', () => {
     }
 });
 
-let hist_arr = [];
+// Функция получения истории из localStorage
+function getHistory() {
+    try {
+        const savedHistory = localStorage.getItem('history');
+        return savedHistory ? JSON.parse(savedHistory) : [];
+    } catch (error) {
+        console.error("Ошибка парсинга истории:", error);
+        return [];
+    }
+}
 
-// Функция для добавления записи в массив
-function addToArray() {
-    let currentDate = new Date();
-    let currentValue = counter.textContent;
+// Функция сохранения истории в localStorage
+function saveHistory(history) {
+    localStorage.setItem('history', JSON.stringify(history));
+}
 
-    // Проверяем, если в массиве уже есть записи
-    if (hist_arr.length > 0) {
-        // Сравниваем текущее значение с последним записанным значением
-        let lastRecord = hist_arr[hist_arr.length - 1];
-        if (parseInt(lastRecord.value) === parseInt(currentValue)) {
-            console.log("Значение счетчика не изменилось, запись не добавляется.");
-            return; 
-        }
+// Функция добавления записи в историю
+function addToHistory() {
+    const currentDate = new Date();
+    const currentValue = counter.textContent;
+    
+    let history = getHistory();
+
+    // Проверяем, изменилось ли значение
+    if (history.length > 0 && parseInt(history[history.length - 1].value) === parseInt(currentValue)) {
+        console.log("Значение счетчика не изменилось, запись не добавляется.");
+        return;
     }
 
-    // Если в массиве уже 5 записей, удаляем первую (самую старую)
-    if (hist_arr.length >= 5) {
-        hist_arr.shift();
+    // Ограничиваем количество записей (не более 5)
+    if (history.length >= 5) {
+        history.shift();
     }
 
-    // Добавляем новую запись
-    hist_arr.push({ value: currentValue, date: currentDate });
+    // Добавляем новую запись и сохраняем
+    history.push({ value: currentValue, date: currentDate });
+    saveHistory(history);
 
-    // Сохраняем массив в localStorage
-    localStorage.setItem('history', JSON.stringify(hist_arr));
-
-    console.log("Saved to localStorage:", localStorage.getItem('history'));
-
-    // Обновляем отображение истории
+    console.log("История обновлена:", history);
     updateHistoryRecords();
 }
 
-// Функция для проверки времени
+// Функция проверки времени (добавляет запись в 00:00)
 function checkTime() {
-    let now = new Date();
-    if (now.getHours() === 0 && now.getMinutes() === 30) {
-        addToArray();
+    const now = new Date();
+    if (now.getHours() === 0 && now.getMinutes() === 0) {
+        addToHistory();
     }
 }
 
-// Проверяем время каждую минуту
+// Проверка каждую минуту
 setInterval(checkTime, 60 * 1000);
 
-// Функция обновления отображения истории
+// Функция обновления интерфейса истории
 function updateHistoryRecords() {
     const historyRecords = document.querySelector('.history-records');
     const burgerRecords = document.querySelector('.burger-records');
-    historyRecords.innerHTML = ''; // Очищаем старые записи
+
+    const history = getHistory();
+    historyRecords.innerHTML = '';
     burgerRecords.innerHTML = '';
 
-    console.log("Rendering hist_arr:", hist_arr);
-
-    hist_arr.forEach(record => {
+    history.forEach(record => {
         const date = new Date(record.date);
         const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1)
             .toString()
             .padStart(2, '0')}.${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}`;
 
-        const recordHTML = `
-            <div>${formattedDate} - <span class="highlight">${record.value}</span></div>
-        `;
+        const recordHTML = `<div>${formattedDate} - <span class="highlight">${record.value}</span></div>`;
         historyRecords.innerHTML += recordHTML;
         burgerRecords.innerHTML += recordHTML;
     });
+
+    console.log("Отображение истории обновлено:", history);
 }
 
-// Загрузка данных из localStorage при загрузке страницы
+// Загрузка данных при запуске страницы
 document.addEventListener('DOMContentLoaded', () => {
-    const savedHistory = localStorage.getItem('history');
-
-    if (savedHistory) {
-        try {
-            hist_arr = JSON.parse(savedHistory);
-            if (!Array.isArray(hist_arr)) {
-                hist_arr = []; // Если почему-то загрузилось не массивом, сбрасываем
-            }
-        } catch (error) {
-            console.error("Ошибка парсинга истории:", error);
-            hist_arr = []; // Если JSON был некорректен, сбрасываем
-        }
-    } else {
-        hist_arr = []; // Если данных нет, создаем пустой массив
-    }
-
-    console.log("Parsed hist_arr:", hist_arr);
-    updateHistoryRecords(); // Обновляем отображение истории
+    updateHistoryRecords();
 
     const savedCounter = localStorage.getItem('counter');
-    if (savedCounter !== null) { // Проверяем, действительно ли сохранено число
+    if (savedCounter !== null) {
         counter.textContent = savedCounter;
     }
 });
