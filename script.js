@@ -86,7 +86,7 @@ function addToArray() {
     if (hist_arr.length > 0) {
         // Сравниваем текущее значение с последним записанным значением
         let lastRecord = hist_arr[hist_arr.length - 1];
-        if (lastRecord.value === currentValue) {
+        if (parseInt(lastRecord.value) === parseInt(currentValue)) {
             console.log("Значение счетчика не изменилось, запись не добавляется.");
             return; 
         }
@@ -112,7 +112,7 @@ function addToArray() {
 // Функция для проверки времени
 function checkTime() {
     let now = new Date();
-    if (now.getHours() === 0 && now.getMinutes() === 0) {
+    if (now.getHours() === 0 && now.getMinutes() === 26) {
         addToArray();
     }
 }
