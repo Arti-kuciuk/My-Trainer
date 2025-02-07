@@ -3,87 +3,24 @@ const resetButton = document.getElementById('reset');
 const undoButton = document.getElementById('undo');
 const history = document.getElementById('history-btn');
 
-// Функция обновления значения счетчика
-function updateCounter(value) {
-    const currentValue = parseInt(counter.textContent);
-    const newValue = currentValue + value;
-    counter.textContent = newValue;
-
-    localStorage.setItem('counter', counter.textContent);
-}
-
 let previousValue = 0;
 
-// Функция для сброса счетчика
-resetButton.addEventListener('click', () => {
-    previousValue = parseInt(counter.textContent);
-    counter.textContent = '0';
+// Функция обновления значения счетчика
+function updateCounter(value) {
+    let currentValue = parseInt(counter.textContent);
+    let newValue = currentValue + value;
 
-    localStorage.setItem('counter', '0');
-});
+    // Ограничиваем значение от 0 до 999
+    newValue = Math.min(999, Math.max(0, newValue));
 
-// Функция для отмены последнего сброса
-undoButton.addEventListener('click', () => {
-    // Восстанавливаем предыдущее значение счетчика, если текущее значение равно 0
-    if (counter.textContent === '0') {
-        counter.textContent = previousValue.toString();
-    }
-});
-
-// Добавляем обработчики событий для всех кнопок (увеличение/уменьшение значения)
-document.querySelectorAll('.button').forEach(button => {
-    button.addEventListener('click', () => {
-        const id = button.id;
-
-        switch (id) {
-            case '-10':
-                updateCounter(-10);
-                break;
-            case '-':
-                updateCounter(-1);
-                break;
-            case '+':
-                updateCounter(1);
-                break;
-            case '+10':
-                updateCounter(10);
-                break;
-        }
-
-        // Ограничиваем значение счетчика от 0 до 999
-        let currentValue = parseInt(counter.textContent);
-        if (currentValue < 0) {
-            counter.textContent = '0';
-        } else if (currentValue > 999) {
-            counter.textContent = '999';
-        }
-    });
-});
-
-// Обработчик для кнопки "История" (раскрытие записей истории)
-history.addEventListener('click', () => {
-    // Находим контейнер с классом .history
-    const historyContainer = document.querySelector('.history');
-
-    // Проверяем, есть ли класс expanded
-    if (historyContainer.classList.contains('expanded')) {
-        // Убираем класс, если он есть
-        historyContainer.classList.remove('expanded');
-    } else {
-        // Добавляем класс, если его нет
-        historyContainer.classList.add('expanded');
-    }
-});
+    counter.textContent = newValue;
+    localStorage.setItem('counter', newValue);
+}
 
 // Функция получения истории из localStorage
 function getHistory() {
-    try {
-        const savedHistory = localStorage.getItem('history');
-        return savedHistory ? JSON.parse(savedHistory) : [];
-    } catch (error) {
-        console.error("Ошибка парсинга истории:", error);
-        return [];
-    }
+    const savedHistory = localStorage.getItem('history');
+    return savedHistory ? JSON.parse(savedHistory) : [];
 }
 
 // Функция сохранения истории в localStorage
@@ -91,20 +28,26 @@ function saveHistory(history) {
     localStorage.setItem('history', JSON.stringify(history));
 }
 
-// Функция добавления записи в историю
+// Функция добавления записи в историю (не более 5 записей)
 function addToHistory() {
     const currentDate = new Date();
     const currentValue = counter.textContent;
-    
+
     let history = getHistory();
 
-    // Проверяем, изменилось ли значение
-    if (history.length > 0 && parseInt(history[history.length - 1].value) === parseInt(currentValue)) {
-        console.log("Значение счетчика не изменилось, запись не добавляется.");
-        return;
+    // Проверяем, была ли запись за сегодня
+    if (history.length > 0) {
+        const lastRecordDate = new Date(history[history.length - 1].date);
+        if (
+            lastRecordDate.getDate() === currentDate.getDate() &&
+            lastRecordDate.getMonth() === currentDate.getMonth() &&
+            lastRecordDate.getFullYear() === currentDate.getFullYear()
+        ) {
+            return; // Уже записано за сегодня, ничего не делаем
+        }
     }
 
-    // Ограничиваем количество записей (не более 5)
+    // Ограничиваем количество записей (макс. 5)
     if (history.length >= 5) {
         history.shift();
     }
@@ -112,21 +55,8 @@ function addToHistory() {
     // Добавляем новую запись и сохраняем
     history.push({ value: currentValue, date: currentDate });
     saveHistory(history);
-
-    console.log("История обновлена:", history);
     updateHistoryRecords();
 }
-
-// Функция проверки времени (добавляет запись в 00:00)
-function checkTime() {
-    const now = new Date();
-    if (now.getHours() === 0 && now.getMinutes() === 0) {
-        addToHistory();
-    }
-}
-
-// Проверка каждую минуту
-setInterval(checkTime, 60 * 1000);
 
 // Функция обновления интерфейса истории
 function updateHistoryRecords() {
@@ -147,43 +77,80 @@ function updateHistoryRecords() {
         historyRecords.innerHTML += recordHTML;
         burgerRecords.innerHTML += recordHTML;
     });
-
-    console.log("Отображение истории обновлено:", history);
 }
+
+// Обработчик кнопки сброса
+resetButton.addEventListener('click', () => {
+    previousValue = parseInt(counter.textContent);
+    counter.textContent = '0';
+    localStorage.setItem('counter', '0');
+});
+
+// Обработчик кнопки отмены сброса
+undoButton.addEventListener('click', () => {
+    if (counter.textContent === '0') {
+        counter.textContent = previousValue.toString();
+        localStorage.setItem('counter', previousValue);
+    }
+});
+
+// Добавляем обработчики событий для всех кнопок (+/-)
+document.querySelectorAll('.button').forEach(button => {
+    button.addEventListener('click', () => {
+        const id = button.id;
+        switch (id) {
+            case '-10': updateCounter(-10); break;
+            case '-': updateCounter(-1); break;
+            case '+': updateCounter(1); break;
+            case '+10': updateCounter(10); break;
+        }
+    });
+});
+
+// Обработчик кнопки "История" (раскрытие/скрытие истории)
+history.addEventListener('click', () => {
+    document.querySelector('.history').classList.toggle('expanded');
+});
+
+// Проверка времени для автоматического сохранения истории в 00:00
+function checkTime() {
+    const now = new Date();
+    if (now.getHours() === 0 && now.getMinutes() === 0) {
+        addToHistory();
+    }
+}
+setInterval(checkTime, 60 * 1000); // Проверяем каждую минуту
 
 // Загрузка данных при запуске страницы
 document.addEventListener('DOMContentLoaded', () => {
     updateHistoryRecords();
 
+    // Восстановление счетчика
     const savedCounter = localStorage.getItem('counter');
     if (savedCounter !== null) {
         counter.textContent = savedCounter;
     }
+
+    // Добавляем запись в историю, если ее нет за сегодняшний день
+    addToHistory();
 });
 
+// Бургер-меню
 const burgerIcon = document.getElementById("burger-icon");
 const menu = document.querySelector(".burger-menu");
 
 if (burgerIcon && menu) {
-    // Обработка клика на иконку бургера
     burgerIcon.addEventListener("click", () => {
         burgerIcon.classList.toggle("active");
         menu.classList.toggle("open");
-
-        // Блокировка скролла
-        if (menu.classList.contains("open")) {
-            document.body.classList.add("no-scroll");
-        } else {
-            document.body.classList.remove("no-scroll");
-        }
+        document.body.classList.toggle("no-scroll");
     });
 
-    // Обработка клика вне меню
     document.addEventListener("click", (e) => {
         if (!menu.contains(e.target) && !burgerIcon.contains(e.target)) {
             burgerIcon.classList.remove("active");
             menu.classList.remove("open");
-            document.body.classList.remove("no-scroll"); // Убираем блокировку скролла
+            document.body.classList.remove("no-scroll");
         }
     });
 }
