@@ -70,9 +70,9 @@ function updateHistoryRecords() {
     history.forEach(record => {
         const date = new Date(record.date);
         const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1)
-            .toString()
-            .padStart(2, '0')}.${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}`;
-
+        .toString()
+        .padStart(2, '0')}.${date.getFullYear()}`;
+        
         const recordHTML = `<div>${formattedDate} - <span class="highlight">${record.value}</span></div>`;
         historyRecords.innerHTML += recordHTML;
         burgerRecords.innerHTML += recordHTML;
