@@ -130,7 +130,7 @@ history.addEventListener('click', () => {
 // Проверка времени для автоматического сохранения истории в 00:00
 function checkTime() {
     const now = new Date();
-    if (now.getHours() === 16 && now.getMinutes() === 30) {
+    if (now.getHours() === 0 && now.getMinutes() === 0) {
         addToHistory();
     }
 }
