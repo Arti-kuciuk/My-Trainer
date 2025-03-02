@@ -31,19 +31,34 @@ function saveHistory(history) {
 // Функция добавления записи в историю (не более 5 записей)
 function addToHistory() {
     const currentDate = new Date();
-    const currentValue = counter.textContent;
+    const currentValue = parseInt(counter.textContent);
 
     let history = getHistory();
 
-    // Проверяем, была ли запись за сегодня
+    // Проверяем, есть ли уже записи в истории
     if (history.length > 0) {
-        const lastRecordDate = new Date(history[history.length - 1].date);
+        const lastRecord = history[history.length - 1];
+        const lastRecordDate = new Date(lastRecord.date);
+        const lastRecordValue = parseInt(lastRecord.value);
+        
+        // Если запись за сегодня уже существует, обновляем её значение
         if (
             lastRecordDate.getDate() === currentDate.getDate() &&
             lastRecordDate.getMonth() === currentDate.getMonth() &&
             lastRecordDate.getFullYear() === currentDate.getFullYear()
         ) {
-            return; // Уже записано за сегодня, ничего не делаем
+            // Обновляем значение только если оно изменилось
+            if (currentValue !== lastRecordValue) {
+                lastRecord.value = currentValue;
+                saveHistory(history);
+                updateHistoryRecords();
+            }
+            return;
+        }
+        
+        // Не добавляем новую запись, если значение не изменилось с последней записи
+        if (currentValue === lastRecordValue) {
+            return;
         }
     }
 
@@ -115,7 +130,7 @@ history.addEventListener('click', () => {
 // Проверка времени для автоматического сохранения истории в 00:00
 function checkTime() {
     const now = new Date();
-    if (now.getHours() === 0 && now.getMinutes() === 0) {
+    if (now.getHours() === 16 && now.getMinutes() === 30) {
         addToHistory();
     }
 }
